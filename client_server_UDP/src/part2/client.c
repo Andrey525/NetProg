@@ -4,23 +4,18 @@
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-
-#define BUF_SIZE 1024
 
 int main(int argc, char *argv[]) {
   int sock;
   struct sockaddr_in client_addr, server_addr;
   struct hostent *hp;
-  socklen_t length;
-  char *buf = malloc(sizeof(char) * BUF_SIZE);
-  int bytes_read;
+  int i, n;
 
   if (argc < 4) {
-    printf("ENTER ./bin/client hostname port message\n");
+    printf("ENTER ./bin/client hostname port n\n");
     exit(1);
   }
 
@@ -48,25 +43,19 @@ int main(int argc, char *argv[]) {
   }
 
   printf("CLIENT: Is ready for sending\n");
-
-  memset(buf, 0, sizeof(char) * BUF_SIZE);
-  strcpy(buf, argv[3]);
-  printf("CLIENT: Message to send: \"%s\"\n", buf);
-  if (sendto(sock, buf, strlen(buf), 0, (struct sockaddr *)&server_addr,
-             sizeof(server_addr)) < 0) {
-    perror("sendto");
-    exit(3);
+  printf("CLIENT: Sending...\n");
+  n = atoi(argv[3]);
+  for (i = 0; i < n; i++) {
+    if (sendto(sock, &n, sizeof(int), 0, (struct sockaddr *)&server_addr,
+               sizeof(server_addr)) < 0) {
+      perror("sendto");
+      exit(3);
+    }
+    printf("CLIENT: Sent %d from %d\n", i + 1, n);
+    sleep(n);
   }
 
   printf("CLIENT: Sending complete\n");
-
-  if ((bytes_read = recvfrom(sock, buf, BUF_SIZE, 0,
-                             (struct sockaddr *)&server_addr, &length)) < 0) {
-    perror("recvfrom");
-    exit(4);
-  }
-
-  printf("CLIENT: Received back message: \"%s\"\n", buf);
 
   close(sock);
 

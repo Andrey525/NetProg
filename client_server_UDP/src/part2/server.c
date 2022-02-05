@@ -1,25 +1,23 @@
 #include <arpa/inet.h>
+#include <memory.h>
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
 
-#define BUF_SIZE 1024
-
 int main() {
   int sock;
   socklen_t length;
-  int bytes_read;
   struct sockaddr_in server_addr, client_addr;
-  char* buf = malloc(sizeof(char) * BUF_SIZE);
+  int n;
 
   if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
     perror("socket");
     exit(1);
   }
+
   memset(&server_addr, 0, sizeof(server_addr));
 
   server_addr.sin_family = AF_INET;
@@ -38,9 +36,8 @@ int main() {
   printf("SERVER: port number - %d\n", ntohs(server_addr.sin_port));
 
   while (1) {
-    memset(buf, 0, sizeof(char) * BUF_SIZE);
-    if ((bytes_read = recvfrom(sock, buf, BUF_SIZE, 0,
-                               (struct sockaddr*)&client_addr, &length)) < 0) {
+    if (recvfrom(sock, &n, sizeof(int), 0, (struct sockaddr*)&client_addr,
+                 &length) < 0) {
       perror("recvfrom");
       exit(4);
     }
@@ -48,17 +45,7 @@ int main() {
     printf("SERVER: Client address: %s:%d\n", inet_ntoa(client_addr.sin_addr),
            ntohs(client_addr.sin_port));
 
-    printf("SERVER: Received message: \"%s\"\n", buf);
-
-    buf = strcat(buf, "!");
-    if (sendto(sock, buf, strlen(buf), 0, (struct sockaddr*)&client_addr,
-               sizeof(client_addr)) < 0) {
-      perror("sendto");
-      exit(5);
-    }
-    printf("SERVER: Message was changed to: \"%s\"\n", buf);
-
-    printf("SERVER: Reverse sending complete\n");
+    printf("SERVER: Received n = %d\n", n);
   }
 
   close(sock);
