@@ -14,7 +14,9 @@ int main(int argc, char *argv[]) {
   int sock;
   struct sockaddr_in client_addr, server_addr;
   struct hostent *hp;
-  char buf[BUF_SIZE];
+  socklen_t length;
+  char *buf = malloc(sizeof(char) * BUF_SIZE);
+  int bytes_read;
 
   if (argc < 4) {
     printf("ENTER ./bin/client hostname port message\n");
@@ -56,6 +58,15 @@ int main(int argc, char *argv[]) {
   }
 
   printf("CLIENT: Sending complete\n");
+
+  length = sizeof(server_addr);
+  if ((bytes_read = recvfrom(sock, buf, BUF_SIZE, 0,
+                             (struct sockaddr *)&server_addr, &length)) < 0) {
+    perror("recvfrom");
+    exit(4);
+  }
+
+  printf("CLIENT: Received back message: \"%s\"\n", buf);
 
   close(sock);
 

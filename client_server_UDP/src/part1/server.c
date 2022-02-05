@@ -14,7 +14,7 @@ int main() {
   socklen_t length;
   int bytes_read;
   struct sockaddr_in server_addr, client_addr;
-  char buf[BUF_SIZE];
+  char* buf = malloc(sizeof(char) * BUF_SIZE);
 
   if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
     perror("socket");
@@ -48,7 +48,18 @@ int main() {
 
     printf("SERVER: Client address: %s:%d\n", inet_ntoa(client_addr.sin_addr),
            ntohs(client_addr.sin_port));
+
     printf("SERVER: Received message: \"%s\"\n", buf);
+
+    buf = strcat(buf, "!");
+    if (sendto(sock, buf, strlen(buf), 0, (struct sockaddr*)&client_addr,
+               sizeof(client_addr)) < 0) {
+      perror("sendto");
+      exit(5);
+    }
+    printf("SERVER: Message was changed to: \"%s\"\n", buf);
+
+    printf("SERVER: Reverse sending complete\n");
   }
 
   close(sock);
