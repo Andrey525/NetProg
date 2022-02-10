@@ -1,6 +1,7 @@
 #include <arpa/inet.h>
 #include <memory.h>
 #include <netinet/in.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
