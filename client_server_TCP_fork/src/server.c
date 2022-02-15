@@ -1,6 +1,5 @@
 #include <arpa/inet.h>
 #include <memory.h>
-#include <netinet/in.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,7 +44,10 @@ int main() {
     }
     printf("SERVER: port number - %d\n", ntohs(server_addr.sin_port));
 
-    listen(sock_server, MAX_QUEUE);
+    if (listen(sock_server, MAX_QUEUE) < 0) {
+        perror("listen");
+        exit(SOCKET_LISTEN_ERROR);
+    }
 
     while (1) {
         if ((sock_client = accept(sock_server, (struct sockaddr *)&client_addr,

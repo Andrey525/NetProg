@@ -1,15 +1,12 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <memory.h>
-#include <netinet/in.h>
 #include <pthread.h>
-#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/wait.h>
 #include <unistd.h>
 
 #define MAX_QUEUE 10
@@ -18,6 +15,7 @@
 #define SOCKET_BIND_ERROR -2
 #define SOCKET_GETSOCKNAME_ERROR -3
 #define SOCKET_ACCEPT_ERROR -4
+#define SOCKET_LISTEN_ERROR -5
 #define PTHREAD_CREATE_ERROR -10
 #define PTHREAD_DETACH_ERROR -11
 #define PTHREAD_MUTEX_LOCK_ERROR -12
@@ -136,7 +134,10 @@ int main() {
     }
     printf("SERVER: port number - %d\n", ntohs(server_addr.sin_port));
 
-    listen(sock_server, MAX_QUEUE);
+    if (listen(sock_server, MAX_QUEUE) < 0) {
+        perror("listen");
+        exit(SOCKET_LISTEN_ERROR);
+    }
 
     while (1) {
         if ((sock_client = accept(sock_server, (struct sockaddr *)&client_addr,
