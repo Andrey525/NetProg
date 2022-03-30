@@ -36,6 +36,7 @@ int main() {
     printf("SERVER: port number - %d\n", ntohs(server_addr.sin_port));
 
     while (1) {
+        length = sizeof(struct sockaddr_in);
         if (recvfrom(sock, &n, sizeof(int), 0, (struct sockaddr *)&client_addr,
                      &length) < 0) {
             perror("recvfrom");

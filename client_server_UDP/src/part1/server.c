@@ -39,6 +39,7 @@ int main() {
 
     while (1) {
         memset(buf, 0, sizeof(char) * BUF_SIZE);
+        length = sizeof(struct sockaddr_in);
         if ((bytes_read = recvfrom(sock, buf, BUF_SIZE, 0,
                                    (struct sockaddr *)&client_addr, &length)) <
             0) {

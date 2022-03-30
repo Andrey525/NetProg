@@ -13,7 +13,7 @@
 
 int main(int argc, char *argv[]) {
     int sock;
-    struct sockaddr_in client_addr, server_addr;
+    struct sockaddr_in server_addr;
     struct hostent *hp;
     socklen_t length;
     char *buf = malloc(sizeof(char) * BUF_SIZE);
@@ -36,17 +36,6 @@ int main(int argc, char *argv[]) {
     bcopy(hp->h_addr, &server_addr.sin_addr, hp->h_length);
     server_addr.sin_port = htons(atoi(argv[2]));
 
-    memset(&client_addr, 0, sizeof(client_addr));
-
-    client_addr.sin_family = AF_INET;
-    client_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    client_addr.sin_port = 0;
-
-    if (bind(sock, (struct sockaddr *)&client_addr, sizeof(client_addr)) < 0) {
-        perror("bind");
-        exit(2);
-    }
-
     printf("CLIENT: Is ready for sending\n");
 
     memset(buf, 0, sizeof(char) * BUF_SIZE);
@@ -59,7 +48,7 @@ int main(int argc, char *argv[]) {
     }
 
     printf("CLIENT: Sending complete\n");
-
+    length = sizeof(struct sockaddr_in);
     if ((bytes_read = recvfrom(sock, buf, BUF_SIZE, 0,
                                (struct sockaddr *)&server_addr, &length)) < 0) {
         perror("recvfrom");
